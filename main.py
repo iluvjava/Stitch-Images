@@ -6,7 +6,6 @@ class PagesMange:
     def __init__(this, directory:str):
         this._MainDir = directory
 
-        pass
 
 
 

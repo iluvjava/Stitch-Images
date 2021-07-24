@@ -20,17 +20,37 @@ def ReadImage(filename:str) -> np.ndarray:
     :param mode:
         The reading mode, an ENUM under cv2.
     :return:
-        read image, it's gonna be a ndarray type from numpy
+        read image, it's gonna be a ndarray type from numpy,
+        None if there is something wrong, not exception will be thrown.
     """
     im = cv2.imread(filename)
     return im
 
 
 def SaveAsImage(filenamepath:str, image:np.ndarray):
+    """
+        Saves the image as a file, if the path is valid, then
+        nothing will happen.
+    :param filenamepath:
+        The path of the file
+    :param image:
+        The image to save
+    :return:
+        Nothing
+    """
     cv2.imwrite(filenamepath, image)
 
 
 def FilterOutImages(path:str, topdown=False):
+    """
+        Given the path, to a folder, filter out all the images.
+    :param path:
+        string, path to a folder. with `\` and ends with `\`
+    :param topdown:
+        Scanning from top folder to bottom folder
+    :return:
+        It yields, not return.
+    """
     for root, dirs, files in walk(path, topdown=topdown):
         dirs[:] = [d for d in dirs if d != OUTPUT_FOLDER] # ignore output folders
         Filtered = [f for f in files if f.split(".")[-1] in MEDIA_IMAGE_POSTFIX]
@@ -39,6 +59,14 @@ def FilterOutImages(path:str, topdown=False):
 
 
 def ConcateImageArray(images:NumericImg)-> np.ndarray:
+    """
+        Given a list of mumpy images, it stitch all of them vertically
+        together into one big image.
+    :param images:
+        a list of nd array of all the images.
+    :return:
+        numpy array of the stitched image. 
+    """
     MaximalWidth = -float("inf")
     TotalHeight = 0
     for Img in images:
