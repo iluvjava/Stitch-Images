@@ -68,7 +68,7 @@ In this directory the script will:
 * Install python on the computer and make sure it's in under the path.
 * Note: If `pip` doesn't work, replace `python -m pip` instead. Then things should work 
 
-### With just python and pip on windows, WITHOUT Virtual Environment. 
+### With just python and pip on Windows/Linux, WITHOUT Virtual Environment. 
 ```
 python -m pip install -r requirements.txt
 ```
