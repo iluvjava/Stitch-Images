@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from fpdf import FPDF
 
+
 NumericImg = List[np.ndarray]
-MEDIA_IMAGE_POSTFIX = ["png", "jpg", "jpeg", "tiff", "bmp"]
+MEDIA_IMAGE_POSTFIX = ["png", "jpg", "jpeg"]
 OUTPUT_FOLDER = "out"  # this folder is ignored during scanning.
 
 
@@ -29,8 +30,11 @@ def ReadImage(filename:str) -> np.ndarray:
 
 def SaveAsImage(filenamepath:str, image:np.ndarray):
     """
-        Saves the image as a file, if the path is valid, then
-        nothing will happen.
+        Saves the image as a file,
+        - if sub directory or director doesn't exist,
+        it will mkdir for you.
+        - if file already exists, it will override it for you.
+
     :param filenamepath:
         The path of the file
     :param image:
@@ -38,24 +42,31 @@ def SaveAsImage(filenamepath:str, image:np.ndarray):
     :return:
         Nothing
     """
+    Path(filenamepath).parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(filenamepath, image)
 
 
-def FilterOutImages(path:str, topdown=False):
+def FilterOutImages(path:str, depth=float("inf")):
     """
         Given the path, to a folder, filter out all the images.
     :param path:
         string, path to a folder. with `\` and ends with `\`
-    :param topdown:
-        Scanning from top folder to bottom folder
+    :param depth:
+        from the top level, it will only goes a certain depth into the
+        directory tree.
     :return:
         It yields, not return.
     """
-    for root, dirs, files in walk(path, topdown=topdown):
+    Depth = depth
+    for root, dirs, files in walk(path, topdown=True):
+        if Depth == 0:
+            dirs[:] = [] # block all sub director at this level.
         dirs[:] = [d for d in dirs if d != OUTPUT_FOLDER] # ignore output folders
+
         Filtered = [f for f in files if f.split(".")[-1] in MEDIA_IMAGE_POSTFIX]
         if len(Filtered) != 0:
             yield f"{root}\\", Filtered
+        Depth -= 1
 
 
 def ConcateImageArray(images:NumericImg)-> np.ndarray:
@@ -65,7 +76,7 @@ def ConcateImageArray(images:NumericImg)-> np.ndarray:
     :param images:
         a list of nd array of all the images.
     :return:
-        numpy array of the stitched image. 
+        numpy array of the stitched image.
     """
     MaximalWidth = -float("inf")
     TotalHeight = 0
@@ -76,9 +87,11 @@ def ConcateImageArray(images:NumericImg)-> np.ndarray:
     s = 0  # accumulate heights
     for Img in images:
         h, w, _ = Img.shape
-        BigImg[s: s + h, :w,...] = Img[:, :, ...]
+        BigImg[s: s + h, :w, ...] = Img[:, :, ...]
         s += h
     return BigImg
+
+
 
 
 def test():
