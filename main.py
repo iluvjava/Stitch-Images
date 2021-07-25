@@ -3,6 +3,7 @@ from pathlib import Path
 from fpdf import FPDF
 from tqdm import tqdm
 from PIL import Image, ExifTags
+import click
 
 class bcolors:
     HEADER = '\033[95m'
@@ -63,8 +64,7 @@ class MyPDF(FPDF):
             x=0,
             y=0,
             w=MyPDF.A4PageWidth,
-            h=0,
-
+            h=0
         )
 
 
@@ -83,10 +83,8 @@ class ImagesFolders:
             - All other extra spaces are padded with black, or white.
 
         * PDF Conversion Policies:
-            - If images are all of the same size (Same portions?),
-             then all pages has the same portion as the images and the width is a fixed number.
-            - If images are of different portions, then use A4 and it will place
-            image in the center and preserves the portion.
+            - Each page is the same size as the image, but the width of all the pages
+            are fixed to 210 mm.
     """
 
     def __init__(this, directory:str, depth=2):
@@ -95,12 +93,13 @@ class ImagesFolders:
         :param directory:
             String, that can be interpreted by python pathlib methods.
         """
-        this._MainDirStr = directory
+
         ThePath:Path = Path(directory)
         if not ThePath.exists():
             raise IOError()
         this._MainDir = ThePath  # The main folder of the book.
-        this._ImagesBatchesItr = FilterOutImages(directory, depth=depth) # An iterator for images
+        this._MainDirStr = str(ThePath)
+        this._ImagesBatchesItr = list(FilterOutImages(directory, depth=depth)) # An iterator for images
         this._StitchedImages = [] # stitched imagees in the format of numpy array
         # root folder name is name of the PDF.
         this._Pdf = MyPDF(directory.split("\\")[-1])
@@ -110,7 +109,7 @@ class ImagesFolders:
         Result += f"{indent}dir: {root}, constains images: \n"
         for f in files:
             Result += f"{indent} - {f}\n"
-        if len(files):
+        if len(files) == 0:
             Result += "This Directory doesn't seem to have image files. "
         return Result
 
@@ -134,9 +133,7 @@ class ImagesFolders:
             None
         """
         StitchedImgs = []
-        NewImageBatches = []
         for RootDir, Images in tqdm(this._ImagesBatchesItr):
-            NewImageBatches.append((RootDir, Images))
             if len(Images) != 0:
                 Images = sorted(Images)
                 NpArrays = []
@@ -150,7 +147,6 @@ class ImagesFolders:
 
                     StitchedImgs.append((RootDir, ConcateImageArray(NpArrays)))
         this._StitchedImages = StitchedImgs
-        this._ImagesBatchesItr = NewImageBatches
 
     def StoreImages(this):
         """
@@ -166,7 +162,6 @@ class ImagesFolders:
                 SaveAsImage(f"{Flocator}", Ndarray)
                 pb.set_description(f"saving to: {Flocator}")
 
-
     def StoreToPDF(this):
         ToStore = []
         for RootDir, Images in this._ImagesBatchesItr:
@@ -175,11 +170,17 @@ class ImagesFolders:
         with tqdm(ToStore) as pd:
             for Locator in pd:
                 this._Pdf.FitImageaAndNewPage(Locator)
-        Path(str(this._MainDir.parent.absolute()) + "\\out").mkdir(parents=True, exist_ok=True)
-        this._Pdf.output(this._MainDirStr + f"\\out\\{this._Pdf.fileName}.pdf")
+        ToStoreDir = Path(str(this._MainDir.parent.absolute()) + r"\out")
+        ToStoreDir.mkdir(parents=True, exist_ok=True)
+        ToStoreDir = str(ToStoreDir.absolute())
+        this._Pdf.output(rf"{ToStoreDir}\{this._Pdf.fileName}.pdf")
+
+# ==============================================================================
+#                       For Command Line Interface
+# ==============================================================================
 
 
-def main():
+def test():
     Subject = ImagesFolders(r"C:\Users\victo\Desktop\MLP\Spacpone Apogee\Issue1")
     Subject.ConcateImages()
     Subject.StoreImages()
@@ -191,7 +192,39 @@ def main():
     warn("This is a warning message. ")
     Subject.StoreToPDF()
 
+# Click library at the entry point
+@click.command()
+@click.option("-directory","-d",
+              required=True,
+              help="Specify an existing directory to your collections of comic pages." \
+              "Directory should contains .png, .jpeg, or .jpg files. ")
+@click.option("-level", "-l",
+              default=2,
+              type=click.IntRange(0, 20, clamp=True),
+              help="specify how deep is your comic book directory. ")
+
+def entrypoint(directory:str, level:int):
+
+    try:
+        Converter = ImagesFolders(directory=directory, depth=level)
+    except IOError:
+        print(f"Failed to read from directory: {directory}")
+        return
+    except Exception:
+        print(f"Unexpected Error when constructing converter on directory: {directory}")
+        return
+    print(Converter)
+    warn("The pages of the PDF output will have pages listed in the order above, continue? ")
+    TheInput = input("Press any key to continue, <space> plus <enter> to abort")
+    if TheInput == " ":
+        print("Aborted")
+        return
+    Converter.ConcateImages()
+    Converter.StoreImages()
+    Converter.StoreToPDF()
+
+
 
 
 if __name__ == "__main__":
-    main()
+    entrypoint()
