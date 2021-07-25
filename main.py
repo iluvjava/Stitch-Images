@@ -20,7 +20,7 @@ def warn(mesg:str):
     print(bcolors.WARNING + mesg + bcolors.ENDC)
 
 
-class Images:
+class ImageMetaData:
     """
         For getting the meta data for an image, when stiching the images
         into a PDF files, we would need this.
@@ -28,23 +28,17 @@ class Images:
     def __init__(this, locator:str):
         this._Locator = locator
         this._Image = Image.open(locator)
-        this._MetaData = {}
-        exifdata = this._Image.getexifdata
-        for tagid in exifdata:
-            tagname = ExifTags.TAGS.get(tagid, tagid)
-            value = exifdata.get(tagid)
-            this._MetaData[tagname] = value
 
     @property
     def Height(this):
-        return this._MetaData["YResolution"]
+        return this._Image.size[1]
 
     @property
     def Width(this):
-        return this._MetaData["XResolution"]
+        return this._Image.size[0]
 
 
-class MyComicPDF(FPDF):
+class MyPDF(FPDF):
     A4PageWidth = 210 # in mm, for an A4 paper
     A4PageHeight = 287
 
@@ -52,7 +46,6 @@ class MyComicPDF(FPDF):
         super().__init__(unit=unit, format=format)
         this._FileName = filename
         this.set_margins()
-        this.add_page()
 
     @property
     def fileName(this):
@@ -61,10 +54,19 @@ class MyComicPDF(FPDF):
     def set_margins(this, left=0,top=0,right=0):
         super().set_margins(left, top, right)
 
-    def FitImageaAndNewPage(this, filepath:str, lastpage:bool=False):
-        # TODO: image dimension needs to be centered, and preserved the portion.
-        this.image(name=filepath, x=0, y=0, w=MyComicPDF.A4PageWidth, h=0)
-        if not lastpage: this.add_page()
+    def FitImageaAndNewPage(this, filepath:str):
+        Img = ImageMetaData(filepath)
+        Height =int((Img.Height/Img.Width) * MyPDF.A4PageWidth) # Recompute Height
+        this.add_page(format=(MyPDF.A4PageWidth, Height))
+        this.image(
+            name=filepath,
+            x=0,
+            y=0,
+            w=MyPDF.A4PageWidth,
+            h=0,
+
+        )
+
 
 
 class ImagesFolders:
@@ -101,7 +103,7 @@ class ImagesFolders:
         this._ImagesBatchesItr = FilterOutImages(directory, depth=depth) # An iterator for images
         this._StitchedImages = [] # stitched imagees in the format of numpy array
         # root folder name is name of the PDF.
-        this._Pdf = MyComicPDF(directory.split("\\")[-1])
+        this._Pdf = MyPDF(directory.split("\\")[-1])
 
     def _ReportTree(this, root:str, files:str, indent:str=""):
         Result = ""
@@ -170,16 +172,20 @@ class ImagesFolders:
         for RootDir, Images in this._ImagesBatchesItr:
             for Image in Images:
                 ToStore.append(f"{RootDir}{Image}")
-        with tqdm(ToStore[:-1]) as pd:
+        with tqdm(ToStore) as pd:
             for Locator in pd:
                 this._Pdf.FitImageaAndNewPage(Locator)
-        this._Pdf.FitImageaAndNewPage(ToStore[-1], lastpage=True)
-        Path(str(this._MainDir.absolute()) + "out").mkdir(parents=True, exist_ok=True)
+        Path(str(this._MainDir.parent.absolute()) + "\\out").mkdir(parents=True, exist_ok=True)
         this._Pdf.output(this._MainDirStr + f"\\out\\{this._Pdf.fileName}.pdf")
 
 
 def main():
     Subject = ImagesFolders(r"C:\Users\victo\Desktop\MLP\Spacpone Apogee\Issue1")
+    Subject.ConcateImages()
+    Subject.StoreImages()
+    warn("This is a warning message. ")
+    Subject.StoreToPDF()
+    Subject = ImagesFolders(r"C:\Users\victo\Desktop\MLP\Spacpone Apogee\Issue2")
     Subject.ConcateImages()
     Subject.StoreImages()
     warn("This is a warning message. ")
