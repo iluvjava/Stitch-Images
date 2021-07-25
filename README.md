@@ -81,7 +81,9 @@ python -m venv .
 cd Scripts
 activate
 cd ..
+pip install -r requirements.txt
 ```
+Note: For linux we might need `python3` instead of `python` 
 
 ### With Pipenv + Pyenv on Whatever (Recommended)
 
