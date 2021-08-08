@@ -100,7 +100,7 @@ class ImagesFolders:
         this._MainDir = ThePath  # The main folder of the book.
         this._MainDirStr = str(ThePath)
         this._ImagesBatchesItr = list(FilterOutImages(directory, depth=depth)) # An iterator for images
-        this._StitchedImages = [] # stitched imagees in the format of numpy array
+        this._StitchedImages = [] # stitched images in the format of numpy array
         # root folder name is name of the PDF.
         this._Pdf = MyPDF(directory.split("\\")[-1])
 

@@ -2,15 +2,68 @@ import cv2
 from os import walk
 import numpy as np
 import os
-from typing import List
+from typing import List, Iterable
 import matplotlib.pyplot as plt
 from pathlib import Path
 from fpdf import FPDF
+import re
 
 
 NumericImg = List[np.ndarray]
 MEDIA_IMAGE_POSTFIX = ["png", "jpg", "jpeg"]
 OUTPUT_FOLDER = "out"  # this folder is ignored during scanning.
+
+
+class NumericalFileName:
+    """
+        File names that has numerics in it, this is for custom comparison in
+        python sort function.
+        * Group the names of the file into Numerics and Non-Numerics part.
+        * Compare each group
+        * Numerics are lower than string
+        * Pad the shorter groups of string with null group that is smaller than any other stuff.
+    """
+    def __init__(this, filename:str):
+        this.FileName = filename
+        Splitted = re.split(r"(\d+)", filename)
+        this.FilenameSplit = Splitted
+
+    def __lt__(this, other):
+        x = this.FilenameSplit
+        y = other.FilenameSplit
+        XLessThanY = len(x) < len(y)
+        for Z, T in zip(x, y):
+            if Z.isnumeric() and T.isnumeric():
+                if Z < T: return True
+            elif Z.isnumeric() or T.isnumeric():
+                if Z.isnumeric(): return True
+            else:
+                if Z < T: return True
+        return XLessThanY
+
+    def __eq__(this, other):
+        return this.FileName == other.FileName
+
+    def __gt__(this, other):
+        if this < other:
+            return False
+        if this == other:
+            return False
+        return True
+
+
+def SortedNumericalFileNames(filenames:Iterable[str]):
+    """
+        Given a list of file names that has random type of structures
+        with numerics in it, this function sorts all the filenames that
+        have the same structure using the numerical part of the file name.
+    :param filenames:
+        an iterable of file names
+    :return:
+        The sorted list of file names, in string
+    """
+    result = sorted([NumericalFileName(item) for item in filenames])
+    return [item.FileName for item in result]
 
 
 def ReadImage(filename:str) -> np.ndarray:
@@ -62,11 +115,12 @@ def FilterOutImages(path:str, depth=float("inf")):
         if Depth == 0:
             dirs[:] = [] # block all sub director at this level.
         dirs[:] = [d for d in dirs if d != OUTPUT_FOLDER] # ignore output folders
-
         Filtered = [f for f in files if f.split(".")[-1] in MEDIA_IMAGE_POSTFIX]
+
         if len(Filtered) != 0:
             yield f"{root}\\", Filtered
         Depth -= 1
+
 
 
 def ConcateImageArray(images:NumericImg)-> np.ndarray:
@@ -90,8 +144,6 @@ def ConcateImageArray(images:NumericImg)-> np.ndarray:
         BigImg[s: s + h, :w, ...] = Img[:, :, ...]
         s += h
     return BigImg
-
-
 
 
 def test():
