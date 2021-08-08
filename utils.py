@@ -116,7 +116,7 @@ def FilterOutImages(path:str, depth=float("inf")):
             dirs[:] = [] # block all sub director at this level.
         dirs[:] = [d for d in dirs if d != OUTPUT_FOLDER] # ignore output folders
         Filtered = [f for f in files if f.split(".")[-1] in MEDIA_IMAGE_POSTFIX]
-
+        Filtered = SortedNumericalFileNames(Filtered)
         if len(Filtered) != 0:
             yield f"{root}\\", Filtered
         Depth -= 1

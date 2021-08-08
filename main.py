@@ -135,7 +135,7 @@ class ImagesFolders:
         StitchedImgs = []
         for RootDir, Images in tqdm(this._ImagesBatchesItr):
             if len(Images) != 0:
-                Images = sorted(Images)
+                # Images = sorted(Images) # sort the images
                 NpArrays = []
                 with tqdm(Images, leave=False) as Pbar:
                     for f in Pbar:
@@ -163,6 +163,12 @@ class ImagesFolders:
                 pb.set_description(f"saving to: {Flocator}")
 
     def StoreToPDF(this):
+        """
+            Store all the images into one pdf, located at "../out", name is the same as the name of the
+            root directory searched by this program.
+        :return:
+            None
+        """
         ToStore = []
         for RootDir, Images in this._ImagesBatchesItr:
             for Image in Images:
