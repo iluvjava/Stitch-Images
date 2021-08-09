@@ -27,10 +27,18 @@
   * learn these instead of using string to represent filename, directory. 
   * The `os.walk` will be giving us string of directories and files names, this can be achieved via using join functionality from the pathlib. 
 
-## What Does This Script Do? 
+### What Does This Script Do? 
 
 * Convert folders of images into one big image by stitching then vertically together into one big image, then put it into an folder `out` inside the parent directory. 
 * Convert a nested directories of images into one big PDF file, where all images are sorted by directory's name and then the names of the images. 
+
+
+### **A revision is needed**
+
+* Stitching 300 images into one big pdf files might not be what we want, consider: 
+  * Stitch the images depending which folders they are in. 
+  * Stitch the images for all images, and then partition them into groups of certain sizes, stored as multiple PDF files. 
+* The png stitching functionality should be removed. 
 
 ### Expected Directory Format
 
