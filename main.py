@@ -142,9 +142,10 @@ class ImagesFolders:
                     for f in Pbar:
                         Pbar.set_description(f"{f}")
                         # ToStore = ReadImage(f"{RootDir}{f}")
-                        ToStore = ReadImage(str(Path(RootDir).resolve().joinpath(f)))
+                        Flocate = str(Path(RootDir).resolve().joinpath(f))
+                        ToStore = ReadImage(Flocate)
                         if ToStore is None:
-                            raise Exception(f"Failed to read one of the files in directory: {ToStore}")
+                            raise Exception(f"Failed to read one of the files in directory: {Flocate}")
                         NpArrays.append(ToStore)
 
                     StitchedImgs.append((RootDir, ConcateImageArray(NpArrays)))
