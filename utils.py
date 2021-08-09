@@ -121,7 +121,7 @@ def FilterOutImages(path:str, depth=float("inf")):
         Filtered = [f for f in files if f.split(".")[-1] in MEDIA_IMAGE_POSTFIX]
         Filtered = SortedNumericalFileNames(Filtered)
         if len(Filtered) != 0:
-            yield f"{root}\\", Filtered
+            yield f"{root}", Filtered
         Depth -= 1
 
 
