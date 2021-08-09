@@ -18,28 +18,23 @@ class NumericalFileName:
     """
         File names that has numerics in it, this is for custom comparison in
         python sort function.
-        * Group the names of the file into Numerics and Non-Numerics part.
-        * Compare each group
-        * Numerics are lower than string
-        * Pad the shorter groups of string with null group that is smaller than any other stuff.
+        1. split the string into list of numerical parts and non numerical parts.
+
     """
+    By = 1 # 1, numerics, else, string
+
     def __init__(this, filename:str):
         this.FileName = filename
         Splitted = re.split(r"(\d+)", filename)
-        this.FilenameSplit = Splitted
+        this.FileNameStringParts = [item for item in Splitted if not item.isnumeric()]
+        this.FileNameNumerics = [int(item) for item in Splitted if item.isnumeric()]
+
 
     def __lt__(this, other):
-        x = this.FilenameSplit
-        y = other.FilenameSplit
-        XLessThanY = len(x) < len(y)
-        for Z, T in zip(x, y):
-            if Z.isnumeric() and T.isnumeric():
-                if Z < T: return True
-            elif Z.isnumeric() or T.isnumeric():
-                if Z.isnumeric(): return True
-            else:
-                if Z < T: return True
-        return XLessThanY
+        if NumericalFileName.By == 1:
+            return this.FileNameNumerics < other.FileNameNumerics
+        else:
+            return this.FileNameStringParts < other.FileNameStringParts
 
     def __eq__(this, other):
         return this.FileName == other.FileName
@@ -50,6 +45,9 @@ class NumericalFileName:
         if this == other:
             return False
         return True
+
+    def __repr__(this):
+        return str(this.FilenameSplit)
 
 
 def SortedNumericalFileNames(filenames:Iterable[str]):
@@ -62,8 +60,13 @@ def SortedNumericalFileNames(filenames:Iterable[str]):
     :return:
         The sorted list of file names, in string
     """
-    result = sorted([NumericalFileName(item) for item in filenames])
-    return [item.FileName for item in result]
+    ToSort = [NumericalFileName(item) for item in filenames]
+    NumericalFileName.By = 0
+    ToSort.sort()
+    NumericalFileName.By = 1
+    ToSort.sort()
+    return [item.FileName for item in ToSort]
+
 
 
 def ReadImage(filename:str) -> np.ndarray:
