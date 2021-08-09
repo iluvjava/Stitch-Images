@@ -125,7 +125,6 @@ def FilterOutImages(path:str, depth=float("inf")):
         Depth -= 1
 
 
-
 def ConcateImageArray(images:NumericImg)-> np.ndarray:
     """
         Given a list of mumpy images, it stitch all of them vertically
@@ -147,6 +146,10 @@ def ConcateImageArray(images:NumericImg)-> np.ndarray:
         BigImg[s: s + h, :w, ...] = Img[:, :, ...]
         s += h
     return BigImg
+
+
+def PathJoin(baseDir:str, fileName:str):
+    return os.path.join(baseDir, fileName)
 
 
 def test():

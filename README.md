@@ -21,6 +21,12 @@
   
 * Use `fpdf2, opencv2` and `pillow` for media files manipulations
 
+* Don't fucking treat system path as string jesus. 
+  * use path APIs whenever possible for string manipulations, common options are: 
+  * exist, join, parent, to string, mkdir
+  * learn these instead of using string to represent filename, directory. 
+  * The `os.walk` will be giving us string of directories and files names, this can be achieved via using join functionality from the pathlib. 
+
 ## What Does This Script Do? 
 
 * Convert folders of images into one big image by stitching then vertically together into one big image, then put it into an folder `out` inside the parent directory. 

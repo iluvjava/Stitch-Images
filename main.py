@@ -95,14 +95,15 @@ class ImagesFolders:
         """
 
         ThePath:Path = Path(directory)
+        ThePath = ThePath.resolve()
         if not ThePath.exists():
             raise IOError()
         this._MainDir = ThePath  # The main folder of the book.
         this._MainDirStr = str(ThePath)
         this._ImagesBatchesItr = list(FilterOutImages(directory, depth=depth)) # An iterator for images
         this._StitchedImages = [] # stitched images in the format of numpy array
-        # root folder name is name of the PDF.
-        this._Pdf = MyPDF(directory.split("\\")[-1])
+        # root folder name is name of the PDF!
+        this._Pdf = MyPDF(ThePath.name)
 
     def _ReportTree(this, root:str, files:str, indent:str=""):
         Result = ""
@@ -140,9 +141,10 @@ class ImagesFolders:
                 with tqdm(Images, leave=False) as Pbar:
                     for f in Pbar:
                         Pbar.set_description(f"{f}")
-                        ToStore = ReadImage(f"{RootDir}{f}")
+                        # ToStore = ReadImage(f"{RootDir}{f}")
+                        ToStore = ReadImage(str(Path(RootDir).resolve().joinpath(f)))
                         if ToStore is None:
-                            raise Exception(f"Failed to read one of the files in directory: {RootDir}{f}")
+                            raise Exception(f"Failed to read one of the files in directory: {ToStore}")
                         NpArrays.append(ToStore)
 
                     StitchedImgs.append((RootDir, ConcateImageArray(NpArrays)))
@@ -158,7 +160,9 @@ class ImagesFolders:
             for RootDir, Ndarray in pb:
                 RootPath = Path(RootDir)
                 Parent = Path(RootDir).parent.absolute()
-                Flocator = str(Parent) + f"\\out\\{RootPath.name} out.png"
+                # Flocator = str(Parent) + f"\\out\\{RootPath.name} out.png"
+                Flocator = Parent.joinpath("out").joinpath(f"{RootPath.name}.png")
+                Flocator = str(Flocator)
                 SaveAsImage(f"{Flocator}", Ndarray)
                 pb.set_description(f"saving to: {Flocator}")
 
@@ -176,10 +180,11 @@ class ImagesFolders:
         with tqdm(ToStore) as pd:
             for Locator in pd:
                 this._Pdf.FitImageaAndNewPage(Locator)
-        ToStoreDir = Path(str(this._MainDir.parent.absolute()) + r"\out")
+        # ToStoreDir = Path(str(this._MainDir.parent.absolute()) + r"\out")
+        ToStoreDir = this._MainDir.parent.absolute().joinpath("out")
         ToStoreDir.mkdir(parents=True, exist_ok=True)
-        ToStoreDir = str(ToStoreDir.absolute())
-        this._Pdf.output(rf"{ToStoreDir}\{this._Pdf.fileName}.pdf")
+        FileLocation = ToStoreDir.joinpath(f"{this._Pdf.fileName}.pdf")
+        this._Pdf.output(str(FileLocation))
 
 # ==============================================================================
 #                       For Command Line Interface
