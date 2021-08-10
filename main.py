@@ -4,6 +4,7 @@ from fpdf import FPDF
 from tqdm import tqdm
 from PIL import Image, ExifTags
 import click
+import deprecation
 
 class bcolors:
     HEADER = '\033[95m'
@@ -124,6 +125,7 @@ class ImagesFolders:
         ToPrint += f"Total Number of Pages Found: {ImagesCount}"
         return ToPrint
 
+    @deprecation.deprecated(details="it has unknown problems to it")
     def ConcateImages(this):
         """
             Establish field: Stiched Images, as a map of all the files
@@ -151,6 +153,7 @@ class ImagesFolders:
                     StitchedImgs.append((RootDir, ConcateImageArray(NpArrays)))
         this._StitchedImages = StitchedImgs
 
+    @deprecation.deprecated(details="It has unknown problem to it")
     def StoreImages(this):
         """
             Story this._StitchedImages from numpy array to images.
@@ -233,8 +236,8 @@ def entrypoint(directory:str, level:int):
     if TheInput == " ":
         print("Aborted")
         return
-    Converter.ConcateImages()
-    Converter.StoreImages()
+    # Converter.ConcateImages()
+    # Converter.StoreImages()
     Converter.StoreToPDF()
 
 

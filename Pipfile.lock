@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "479b1bb6a3b2667f2d2cc94236144e18c30e5ccb608f339592c1bff94002524f"
+            "sha256": "5684b689054f3a507a2cd6b9d3829c7aa02b23b1af840ccb29b362e5c1aa729d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -39,6 +39,14 @@
             ],
             "index": "pypi",
             "version": "==0.10.0"
+        },
+        "deprecation": {
+            "hashes": [
+                "sha256:72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff",
+                "sha256:a10811591210e1fb0e768a8c25517cabeabcba6f0bf96564f8ff45189f90b14a"
+            ],
+            "index": "pypi",
+            "version": "==2.1.0"
         },
         "fpdf": {
             "hashes": [
@@ -191,6 +199,14 @@
             ],
             "index": "pypi",
             "version": "==4.5.3.56"
+        },
+        "packaging": {
+            "hashes": [
+                "sha256:7dc96269f53a4ccec5c0670940a4281106dd0bb343f47b7471f779df49c2fbe7",
+                "sha256:c86254f9220d55e31cc94d69bade760f0847da8000def4dfe1c6b872fd14ff14"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==21.0"
         },
         "pillow": {
             "hashes": [
