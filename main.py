@@ -180,7 +180,7 @@ class ImagesFolders:
         ToStore = []
         for RootDir, Images in this._ImagesBatchesItr:
             for Image in Images:
-                ToStore.append(f"{RootDir}{Image}")
+                ToStore.append(str(Path(RootDir).joinpath(Image)))
         with tqdm(ToStore) as pd:
             for Locator in pd:
                 this._Pdf.FitImageaAndNewPage(Locator)
